@@ -1,0 +1,2692 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Family Budget</title>
+<link href="Family%20Budget_files/css2.css" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f3ef;
+    --surface: #ffffff;
+    --surface2: #f0ede8;
+    --border: #e2ddd6;
+    --text: #1a1714;
+    --text-muted: #8a8278;
+    --accent: #2d6a4f;
+    --accent-light: #e8f4ed;
+    --red: #c0392b;
+    --red-light: #fdf0ee;
+    --gold: #b5861a;
+    --gold-light: #fdf6e3;
+    --blue: #1a4a7a;
+    --blue-light: #e8f0fa;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    padding-bottom: 100px;
+  }
+
+  /* Header */
+  .header {
+    background: var(--text);
+    color: white;
+    padding: 56px 24px 28px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .header-title {
+    font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.04em;
+    font-size: 28px;
+    color: white;
+    margin-bottom: 20px;
+  }
+
+  /* Income pills */
+  .income-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .income-pill {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .income-pill span {
+    color: #7ec8a0;
+    font-weight: 600;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 142px;
+    z-index: 99;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    flex: 1;
+    padding: 14px 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-align: center;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    min-width: 70px;
+  }
+
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* Sections */
+  .section { display: none; padding: 20px 16px; }
+  .section.active { display: block; }
+
+  /* Summary cards */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .summary-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 16px;
+    border: 1px solid var(--border);
+  }
+
+  .summary-card.full { grid-column: 1 / -1; }
+  .summary-card.accent { background: var(--accent); border-color: var(--accent); }
+
+  .card-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .summary-card.accent .card-label { color: rgba(255,255,255,0.65); }
+
+  .card-value {
+    font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.04em;
+    font-size: 26px;
+    color: var(--text);
+  }
+
+  .summary-card.accent .card-value { color: white; }
+
+  .card-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .summary-card.accent .card-sub { color: rgba(255,255,255,0.6); }
+
+  .positive { color: var(--accent) !important; }
+  .negative { color: var(--red) !important; }
+
+  /* Section heading */
+  .section-heading {
+    font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.04em;
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  /* Expense list */
+  .expense-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .expense-item {
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.15s;
+    -webkit-user-select: none;
+  }
+
+  .expense-item:active { background: var(--surface2); }
+
+  .expense-left { flex: 1; min-width: 0; }
+
+  .expense-name {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .expense-day {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .expense-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 100px;
+    margin-left: 6px;
+  }
+
+  .badge-red { background: var(--red-light); color: var(--red); }
+  .badge-blue { background: var(--blue-light); color: var(--blue); }
+
+  .expense-amount {
+    font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.04em;
+    font-size: 17px;
+    color: var(--text);
+    white-space: nowrap;
+    margin-left: 12px;
+  }
+
+  /* Variable costs */
+  .variable-item {
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .variable-name { font-size: 14px; font-weight: 500; }
+  .variable-note { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  .variable-amount {
+    font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.04em;
+    font-size: 17px;
+  }
+
+  /* Month selector */
+  .month-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+    margin-bottom: 16px;
+  }
+  .month-scroll::-webkit-scrollbar { display: none; }
+
+  .month-chip {
+    flex-shrink: 0;
+    padding: 7px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .month-chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  /* Paycheck section */
+  .paycheck-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  .paycheck-header {
+    padding: 14px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .paycheck-header .amount {
+    font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.04em;
+    font-size: 18px;
+    color: var(--accent);
+  }
+
+  .paycheck-row {
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .paycheck-row:last-child { border-bottom: none; }
+  .paycheck-row .label { color: var(--text-muted); }
+  .paycheck-row .val { font-weight: 600; }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 10px 0 28px;
+    z-index: 200;
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .nav-icon { font-size: 20px; }
+  .nav-label { font-size: 10px; font-weight: 500; color: var(--text-muted); }
+  .nav-item.active .nav-label { color: var(--accent); }
+  .nav-item.active .nav-icon { filter: none; }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  /* Future period cards */
+  .period-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .period-card-header {
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: background 0.15s;
+  }
+
+  .period-card-header:active { background: var(--surface2); }
+
+  .period-card-header-left { flex: 1; }
+
+  .period-card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.04em;
+    font-size: 17px;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .period-card-range {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .period-card-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .period-card-total {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.04em;
+    font-size: 20px;
+    color: var(--accent);
+  }
+
+  .period-chevron {
+    font-size: 11px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+  }
+
+  .period-card.open .period-chevron { transform: rotate(180deg); }
+
+  .period-card-body {
+    display: none;
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+  }
+
+  .period-card.open .period-card-body { display: block; }
+
+  .period-bill-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .period-bill-row:last-child { border-bottom: none; }
+
+  .period-bill-name { color: var(--text); font-weight: 500; }
+  .period-bill-date { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .period-bill-amount { font-weight: 600; color: var(--text); white-space: nowrap; margin-left: 12px; }
+
+  /* Pay ourselves highlight */
+  .pay-ourselves {
+    background: var(--accent-light);
+    border: 1px solid #b7dfc9;
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .pay-ourselves-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .pay-ourselves-amount {
+    font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.04em;
+    font-size: 24px;
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">Household</div>
+  <div class="header-title">Family Budget</div>
+  <div class="income-row">
+    <div class="income-pill">Matt <span>$4,792 / pp</span></div>
+    <div class="income-pill">Georgie <span>$2,109 / pp</span></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('overview', this)">Overview</div>
+  <div class="tab" onclick="switchTab('fixed', this)">Fixed</div>
+  <div class="tab" onclick="switchTab('variable', this)">Variable</div>
+  <div class="tab" onclick="switchTab('calendar', this)">Calendar</div>
+</div>
+
+<!-- OVERVIEW -->
+<div class="section active" id="overview">
+  <div class="summary-grid">
+    <div class="summary-card accent full">
+      <div class="card-label">Combined Monthly Income</div>
+      <div class="card-value">$13,802</div>
+      <div class="card-sub">Matt $9,584 + Georgie $4,218 (2 pay periods)</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Fixed Costs</div>
+      <div class="card-value">$6,668</div>
+      <div class="card-sub">per month</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Variable Costs</div>
+      <div class="card-value">$2,832</div>
+      <div class="card-sub">est. per month</div>
+    </div>
+    <div class="summary-card full">
+      <div class="card-label">Total Outgoings</div>
+      <div class="card-value">~$9,500</div>
+      <div class="card-sub">Fixed + Variables combined estimate</div>
+    </div>
+  </div>
+
+  <div class="pay-ourselves">
+    <div>
+      <div class="pay-ourselves-label">Pay Ourselves</div>
+      <div style="font-size:12px;color:var(--accent);opacity:0.7;margin-top:2px;">per month</div>
+    </div>
+    <div class="pay-ourselves-amount">$1,500</div>
+  </div>
+
+  <div class="section-heading">Georgie's Extras</div>
+  <div class="expense-list" style="margin-bottom:20px;">
+    <div class="expense-item">
+      <div class="expense-left">
+        <div class="expense-name">HOA Fees</div>
+        <div class="expense-day">Day 9</div>
+      </div>
+      <div class="expense-amount">$515</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left">
+        <div class="expense-name">Credit Card Payment</div>
+        <div class="expense-day">Day 16</div>
+      </div>
+      <div class="expense-amount">$1,500</div>
+    </div>
+  </div>
+
+  <div class="section-heading">Variable Budget / Month</div>
+  <div class="paycheck-card">
+    <div class="paycheck-row"><span class="label">Per pay period</span><span class="val">$1,416</span></div>
+    <div class="paycheck-row"><span class="label">Per month (×2)</span><span class="val">$2,832</span></div>
+  </div>
+</div>
+
+<!-- FIXED COSTS -->
+<div class="section" id="fixed">
+  <div class="section-heading">Fixed Costs</div>
+  <div class="expense-list">
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">Roundpoint Mortgage</div><div class="expense-day">Day 1</div></div>
+      <div class="expense-amount">$3,380</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">YouTube TV</div><div class="expense-day">Day 2</div></div>
+      <div class="expense-amount">$93</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left">
+        <div class="expense-name">STS Transfer <span class="expense-badge badge-blue">Transfer</span></div>
+        <div class="expense-day">Day 4</div>
+      </div>
+      <div class="expense-amount">$350</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">Garmin</div><div class="expense-day">Day 4</div></div>
+      <div class="expense-amount">$15</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">Netflix</div><div class="expense-day">Day 5</div></div>
+      <div class="expense-amount">$25</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left">
+        <div class="expense-name">HOA Fees <span class="expense-badge badge-red">Georgie</span></div>
+        <div class="expense-day">Day 9</div>
+      </div>
+      <div class="expense-amount">$515</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">Geico Insurance</div><div class="expense-day">Day 10</div></div>
+      <div class="expense-amount">$208</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">Ring</div><div class="expense-day">Day 10</div></div>
+      <div class="expense-amount">$5</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">Cox Internet</div><div class="expense-day">Day 11</div></div>
+      <div class="expense-amount">$186</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">Apple</div><div class="expense-day">Day 11</div></div>
+      <div class="expense-amount">$2</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">HP Ink</div><div class="expense-day">Day 11</div></div>
+      <div class="expense-amount">$6</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">Irvine Water</div><div class="expense-day">Day 15</div></div>
+      <div class="expense-amount">$85</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left">
+        <div class="expense-name">Credit Card <span class="expense-badge badge-red">Georgie</span></div>
+        <div class="expense-day">Day 16</div>
+      </div>
+      <div class="expense-amount">$1,500</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">Apple (Cerys)</div><div class="expense-day">Day 16 — via Cerys</div></div>
+      <div class="expense-amount">$11</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left">
+        <div class="expense-name">STS Transfer <span class="expense-badge badge-blue">Transfer</span></div>
+        <div class="expense-day">Day 17 — Cerys</div>
+      </div>
+      <div class="expense-amount">$350</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">AT&amp;T</div><div class="expense-day">Day 18</div></div>
+      <div class="expense-amount">$227</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">Georgie Car</div><div class="expense-day">Day 18</div></div>
+      <div class="expense-amount">$508</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">SoCal Edison Electricity</div><div class="expense-day">Day 19</div></div>
+      <div class="expense-amount">$200</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left">
+        <div class="expense-name">Discover Transfer <span class="expense-badge badge-blue">Transfer</span></div>
+        <div class="expense-day">Day 20</div>
+      </div>
+      <div class="expense-amount">$800</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">Disney+</div><div class="expense-day">Day 20</div></div>
+      <div class="expense-amount">$26</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">Apple iCloud &amp; Apple TV</div><div class="expense-day">Day 24</div></div>
+      <div class="expense-amount">$16</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">Irvine Music</div><div class="expense-day">Day 25</div></div>
+      <div class="expense-amount">$25</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">Spotify</div><div class="expense-day">Day 26</div></div>
+      <div class="expense-amount">$20</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">ChatGPT</div><div class="expense-day">Day 27</div></div>
+      <div class="expense-amount">$20</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">Paramount+</div><div class="expense-day">Day 28</div></div>
+      <div class="expense-amount">$8</div>
+    </div>
+    <div class="expense-item">
+      <div class="expense-left"><div class="expense-name">Gas (fixed portion)</div><div class="expense-day">Day 28</div></div>
+      <div class="expense-amount">$30</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="paycheck-card">
+    <div class="paycheck-header">
+      <span>Fixed Total</span>
+      <span class="amount">$6,668</span>
+    </div>
+  </div>
+</div>
+
+<!-- VARIABLE COSTS -->
+<div class="section" id="variable">
+  <div class="section-heading">Variable Costs</div>
+  <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Per pay period estimates</div>
+  <div class="expense-list">
+    <div class="variable-item">
+      <div><div class="variable-name">Georgie Gas</div></div>
+      <div class="variable-amount">$80</div>
+    </div>
+    <div class="variable-item">
+      <div><div class="variable-name">Matt Gas</div></div>
+      <div class="variable-amount">$180</div>
+    </div>
+    <div class="variable-item">
+      <div><div class="variable-name">Groceries</div></div>
+      <div class="variable-amount">$600</div>
+    </div>
+    <div class="variable-item">
+      <div><div class="variable-name">Costco</div></div>
+      <div class="variable-amount">$100</div>
+    </div>
+    <div class="variable-item">
+      <div><div class="variable-name">Misc Spending</div></div>
+      <div class="variable-amount">$300</div>
+    </div>
+    <div class="variable-item">
+      <div>
+        <div class="variable-name">SoCal Swim</div>
+        <div class="variable-note">Cerys — varies</div>
+      </div>
+      <div class="variable-amount" style="color:var(--text-muted);font-size:13px;">Variable</div>
+    </div>
+    <div class="variable-item">
+      <div><div class="variable-name">Matt Lunch</div></div>
+      <div class="variable-amount">$90</div>
+    </div>
+    <div class="variable-item">
+      <div><div class="variable-name">Robinhood</div></div>
+      <div class="variable-amount">$66</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="paycheck-card">
+    <div class="paycheck-header"><span>Variable Summary</span></div>
+    <div class="paycheck-row"><span class="label">Per pay period</span><span class="val">$1,416</span></div>
+    <div class="paycheck-row"><span class="label">Per month (×2)</span><span class="val">$2,832</span></div>
+  </div>
+</div>
+
+<!-- CALENDAR VIEW -->
+<div class="section" id="calendar">
+  <div class="section-heading" id="calendar-heading">April 2026</div>
+  <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;" id="calendar-subhead">Today is Tue 21 April</div>
+
+  <!-- Upcoming this pay period -->
+  <div id="upcoming-block" style="margin-bottom: 20px; display: block;">
+    <div style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">💰 This Pay Period</div>
+    <div id="upcoming-period-range" style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">Wed 15 April → Tue 28 April</div>
+    <div id="upcoming-list" class="expense-list"><div class="expense-item" style="opacity: 0.55;">
+          <div class="expense-left">
+            <div class="expense-name">Irvine Water</div>
+            <div class="expense-day" style="color:var(--text-muted);">
+              Wed 15 April
+            </div>
+          </div>
+          <div class="expense-amount" style="text-decoration:line-through;">$85</div>
+        </div><div class="expense-item" style="opacity: 0.55;">
+          <div class="expense-left">
+            <div class="expense-name">Credit Card<span class="expense-badge badge-red">Georgie</span></div>
+            <div class="expense-day" style="color:var(--text-muted);">
+              Thu 16 April
+            </div>
+          </div>
+          <div class="expense-amount" style="text-decoration:line-through;">$1,500</div>
+        </div><div class="expense-item" style="opacity: 0.55;">
+          <div class="expense-left">
+            <div class="expense-name">Apple (Cerys)</div>
+            <div class="expense-day" style="color:var(--text-muted);">
+              Thu 16 April
+            </div>
+          </div>
+          <div class="expense-amount" style="text-decoration:line-through;">$11</div>
+        </div><div class="expense-item" style="opacity: 0.55;">
+          <div class="expense-left">
+            <div class="expense-name">STS Transfer (Cerys)<span class="expense-badge badge-blue">Transfer</span></div>
+            <div class="expense-day" style="color:var(--text-muted);">
+              Fri 17 April
+            </div>
+          </div>
+          <div class="expense-amount" style="text-decoration:line-through;">$350</div>
+        </div><div class="expense-item" style="opacity: 0.55;">
+          <div class="expense-left">
+            <div class="expense-name">AT&amp;T</div>
+            <div class="expense-day" style="color:var(--text-muted);">
+              Sat 18 April
+            </div>
+          </div>
+          <div class="expense-amount" style="text-decoration:line-through;">$227</div>
+        </div><div class="expense-item" style="opacity: 0.55;">
+          <div class="expense-left">
+            <div class="expense-name">Georgie Car</div>
+            <div class="expense-day" style="color:var(--text-muted);">
+              Sat 18 April
+            </div>
+          </div>
+          <div class="expense-amount" style="text-decoration:line-through;">$508</div>
+        </div><div class="expense-item" style="opacity: 0.55;">
+          <div class="expense-left">
+            <div class="expense-name">SoCal Edison</div>
+            <div class="expense-day" style="color:var(--text-muted);">
+              Sun 19 April
+            </div>
+          </div>
+          <div class="expense-amount" style="text-decoration:line-through;">$200</div>
+        </div><div class="expense-item" style="opacity: 0.55;">
+          <div class="expense-left">
+            <div class="expense-name">Discover Transfer<span class="expense-badge badge-blue">Transfer</span></div>
+            <div class="expense-day" style="color:var(--text-muted);">
+              Mon 20 April
+            </div>
+          </div>
+          <div class="expense-amount" style="text-decoration:line-through;">$800</div>
+        </div><div class="expense-item" style="opacity: 0.55;">
+          <div class="expense-left">
+            <div class="expense-name">Disney+</div>
+            <div class="expense-day" style="color:var(--text-muted);">
+              Mon 20 April
+            </div>
+          </div>
+          <div class="expense-amount" style="text-decoration:line-through;">$26</div>
+        </div><div class="expense-item" style="">
+          <div class="expense-left">
+            <div class="expense-name">Apple iCloud &amp; TV</div>
+            <div class="expense-day" style="color:var(--text-muted);">
+              Fri 24 April
+            </div>
+          </div>
+          <div class="expense-amount" style="text-decoration:none;">$16</div>
+        </div><div class="expense-item" style="">
+          <div class="expense-left">
+            <div class="expense-name">Irvine Music</div>
+            <div class="expense-day" style="color:var(--text-muted);">
+              Sat 25 April
+            </div>
+          </div>
+          <div class="expense-amount" style="text-decoration:none;">$25</div>
+        </div><div class="expense-item" style="">
+          <div class="expense-left">
+            <div class="expense-name">Spotify</div>
+            <div class="expense-day" style="color:var(--text-muted);">
+              Sun 26 April
+            </div>
+          </div>
+          <div class="expense-amount" style="text-decoration:none;">$20</div>
+        </div><div class="expense-item" style="">
+          <div class="expense-left">
+            <div class="expense-name">ChatGPT</div>
+            <div class="expense-day" style="color:var(--text-muted);">
+              Mon 27 April
+            </div>
+          </div>
+          <div class="expense-amount" style="text-decoration:none;">$20</div>
+        </div><div class="expense-item" style="">
+          <div class="expense-left">
+            <div class="expense-name">Paramount+</div>
+            <div class="expense-day" style="color:var(--text-muted);">
+              Tue 28 April
+            </div>
+          </div>
+          <div class="expense-amount" style="text-decoration:none;">$8</div>
+        </div><div class="expense-item" style="">
+          <div class="expense-left">
+            <div class="expense-name">Gas</div>
+            <div class="expense-day" style="color:var(--text-muted);">
+              Tue 28 April
+            </div>
+          </div>
+          <div class="expense-amount" style="text-decoration:none;">$30</div>
+        </div></div>
+    <div id="upcoming-total" style="margin-top:10px;background:var(--accent-light);border:1px solid #b7dfc9;border-radius:var(--radius-sm);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:12px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;">Period Total</span>
+      <span id="upcoming-total-val" style="font-family:'Bebas Neue',sans-serif;letter-spacing:0.04em;font-size:22px;color:var(--accent);">$3,826</span>
+    </div>
+  </div>
+
+  <div id="calendar-list" class="expense-list"><div style="font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgb(197, 191, 184); margin: 20px 0px 10px; padding-top: 16px; border-top: 1px solid var(--border);">Already Paid This Month</div><div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 4px 4px; margin-top: 4px; color: rgb(197, 191, 184);">Sat 11 April</div><div class="expense-item" style="opacity: 0.45;">
+          <div class="expense-left"><div class="expense-name">HP Ink</div></div>
+          <div class="expense-amount" style="text-decoration:line-through;">$6</div>
+        </div><div class="expense-item" style="opacity: 0.45;">
+          <div class="expense-left"><div class="expense-name">Apple</div></div>
+          <div class="expense-amount" style="text-decoration:line-through;">$2</div>
+        </div><div class="expense-item" style="opacity: 0.45;">
+          <div class="expense-left"><div class="expense-name">Cox Internet</div></div>
+          <div class="expense-amount" style="text-decoration:line-through;">$186</div>
+        </div><div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 4px 4px; margin-top: 4px; color: rgb(197, 191, 184);">Fri 10 April</div><div class="expense-item" style="opacity: 0.45;">
+          <div class="expense-left"><div class="expense-name">Ring</div></div>
+          <div class="expense-amount" style="text-decoration:line-through;">$5</div>
+        </div><div class="expense-item" style="opacity: 0.45;">
+          <div class="expense-left"><div class="expense-name">Geico Insurance</div></div>
+          <div class="expense-amount" style="text-decoration:line-through;">$208</div>
+        </div><div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 4px 4px; margin-top: 4px; color: rgb(197, 191, 184);">Thu 9 April</div><div class="expense-item" style="opacity: 0.45;">
+          <div class="expense-left"><div class="expense-name">HOA Fees<span class="expense-badge badge-red">Georgie</span></div></div>
+          <div class="expense-amount" style="text-decoration:line-through;">$515</div>
+        </div><div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 4px 4px; margin-top: 4px; color: rgb(197, 191, 184);">Sun 5 April</div><div class="expense-item" style="opacity: 0.45;">
+          <div class="expense-left"><div class="expense-name">Netflix</div></div>
+          <div class="expense-amount" style="text-decoration:line-through;">$25</div>
+        </div><div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 4px 4px; margin-top: 4px; color: rgb(197, 191, 184);">Sat 4 April</div><div class="expense-item" style="opacity: 0.45;">
+          <div class="expense-left"><div class="expense-name">Garmin</div></div>
+          <div class="expense-amount" style="text-decoration:line-through;">$15</div>
+        </div><div class="expense-item" style="opacity: 0.45;">
+          <div class="expense-left"><div class="expense-name">STS Transfer<span class="expense-badge badge-blue">Transfer</span></div></div>
+          <div class="expense-amount" style="text-decoration:line-through;">$350</div>
+        </div><div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 4px 4px; margin-top: 4px; color: rgb(197, 191, 184);">Thu 2 April</div><div class="expense-item" style="opacity: 0.45;">
+          <div class="expense-left"><div class="expense-name">YouTube TV</div></div>
+          <div class="expense-amount" style="text-decoration:line-through;">$93</div>
+        </div><div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 4px 4px; margin-top: 4px; color: rgb(197, 191, 184);">Wed 1 April</div><div class="expense-item" style="opacity: 0.45;">
+          <div class="expense-left"><div class="expense-name">Roundpoint Mortgage</div></div>
+          <div class="expense-amount" style="text-decoration:line-through;">$3,380</div>
+        </div></div>
+
+  <!-- Future pay periods -->
+  <div id="future-periods-block" style="margin-top: 24px; display: block;">
+    <div style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;">📆 Future Pay Periods</div>
+    <div id="future-periods-list"><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 29 April – Tue 12 May</div>
+            <div class="period-card-range">11 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$4,785</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Roundpoint Mortgage</div>
+                  <div class="period-bill-date">Fri 1 May</div>
+                </div>
+                <div class="period-bill-amount">$3,380</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">YouTube TV</div>
+                  <div class="period-bill-date">Sat 2 May</div>
+                </div>
+                <div class="period-bill-amount">$93</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">STS Transfer<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Mon 4 May</div>
+                </div>
+                <div class="period-bill-amount">$350</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Garmin</div>
+                  <div class="period-bill-date">Mon 4 May</div>
+                </div>
+                <div class="period-bill-amount">$15</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Netflix</div>
+                  <div class="period-bill-date">Tue 5 May</div>
+                </div>
+                <div class="period-bill-amount">$25</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">HOA Fees<span class="expense-badge badge-red" style="margin-left:6px;">Georgie</span></div>
+                  <div class="period-bill-date">Sat 9 May</div>
+                </div>
+                <div class="period-bill-amount">$515</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Geico Insurance</div>
+                  <div class="period-bill-date">Sun 10 May</div>
+                </div>
+                <div class="period-bill-amount">$208</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Ring</div>
+                  <div class="period-bill-date">Sun 10 May</div>
+                </div>
+                <div class="period-bill-amount">$5</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Cox Internet</div>
+                  <div class="period-bill-date">Mon 11 May</div>
+                </div>
+                <div class="period-bill-amount">$186</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple</div>
+                  <div class="period-bill-date">Mon 11 May</div>
+                </div>
+                <div class="period-bill-amount">$2</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">HP Ink</div>
+                  <div class="period-bill-date">Mon 11 May</div>
+                </div>
+                <div class="period-bill-amount">$6</div>
+              </div>
+        </div>
+      </div><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 13 May – Tue 26 May</div>
+            <div class="period-card-range">12 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$3,768</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Irvine Water</div>
+                  <div class="period-bill-date">Fri 15 May</div>
+                </div>
+                <div class="period-bill-amount">$85</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Credit Card<span class="expense-badge badge-red" style="margin-left:6px;">Georgie</span></div>
+                  <div class="period-bill-date">Sat 16 May</div>
+                </div>
+                <div class="period-bill-amount">$1,500</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple (Cerys)</div>
+                  <div class="period-bill-date">Sat 16 May</div>
+                </div>
+                <div class="period-bill-amount">$11</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">STS Transfer (Cerys)<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Sun 17 May</div>
+                </div>
+                <div class="period-bill-amount">$350</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">AT&amp;T</div>
+                  <div class="period-bill-date">Mon 18 May</div>
+                </div>
+                <div class="period-bill-amount">$227</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Georgie Car</div>
+                  <div class="period-bill-date">Mon 18 May</div>
+                </div>
+                <div class="period-bill-amount">$508</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">SoCal Edison</div>
+                  <div class="period-bill-date">Tue 19 May</div>
+                </div>
+                <div class="period-bill-amount">$200</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Discover Transfer<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Wed 20 May</div>
+                </div>
+                <div class="period-bill-amount">$800</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Disney+</div>
+                  <div class="period-bill-date">Wed 20 May</div>
+                </div>
+                <div class="period-bill-amount">$26</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple iCloud &amp; TV</div>
+                  <div class="period-bill-date">Sun 24 May</div>
+                </div>
+                <div class="period-bill-amount">$16</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Irvine Music</div>
+                  <div class="period-bill-date">Mon 25 May</div>
+                </div>
+                <div class="period-bill-amount">$25</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Spotify</div>
+                  <div class="period-bill-date">Tue 26 May</div>
+                </div>
+                <div class="period-bill-amount">$20</div>
+              </div>
+        </div>
+      </div><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 27 May – Tue 9 June</div>
+            <div class="period-card-range">9 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$4,436</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">ChatGPT</div>
+                  <div class="period-bill-date">Wed 27 May</div>
+                </div>
+                <div class="period-bill-amount">$20</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Paramount+</div>
+                  <div class="period-bill-date">Thu 28 May</div>
+                </div>
+                <div class="period-bill-amount">$8</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Gas</div>
+                  <div class="period-bill-date">Thu 28 May</div>
+                </div>
+                <div class="period-bill-amount">$30</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Roundpoint Mortgage</div>
+                  <div class="period-bill-date">Mon 1 June</div>
+                </div>
+                <div class="period-bill-amount">$3,380</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">YouTube TV</div>
+                  <div class="period-bill-date">Tue 2 June</div>
+                </div>
+                <div class="period-bill-amount">$93</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">STS Transfer<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Thu 4 June</div>
+                </div>
+                <div class="period-bill-amount">$350</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Garmin</div>
+                  <div class="period-bill-date">Thu 4 June</div>
+                </div>
+                <div class="period-bill-amount">$15</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Netflix</div>
+                  <div class="period-bill-date">Fri 5 June</div>
+                </div>
+                <div class="period-bill-amount">$25</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">HOA Fees<span class="expense-badge badge-red" style="margin-left:6px;">Georgie</span></div>
+                  <div class="period-bill-date">Tue 9 June</div>
+                </div>
+                <div class="period-bill-amount">$515</div>
+              </div>
+        </div>
+      </div><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 10 June – Tue 23 June</div>
+            <div class="period-card-range">14 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$4,114</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Geico Insurance</div>
+                  <div class="period-bill-date">Wed 10 June</div>
+                </div>
+                <div class="period-bill-amount">$208</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Ring</div>
+                  <div class="period-bill-date">Wed 10 June</div>
+                </div>
+                <div class="period-bill-amount">$5</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Cox Internet</div>
+                  <div class="period-bill-date">Thu 11 June</div>
+                </div>
+                <div class="period-bill-amount">$186</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple</div>
+                  <div class="period-bill-date">Thu 11 June</div>
+                </div>
+                <div class="period-bill-amount">$2</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">HP Ink</div>
+                  <div class="period-bill-date">Thu 11 June</div>
+                </div>
+                <div class="period-bill-amount">$6</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Irvine Water</div>
+                  <div class="period-bill-date">Mon 15 June</div>
+                </div>
+                <div class="period-bill-amount">$85</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Credit Card<span class="expense-badge badge-red" style="margin-left:6px;">Georgie</span></div>
+                  <div class="period-bill-date">Tue 16 June</div>
+                </div>
+                <div class="period-bill-amount">$1,500</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple (Cerys)</div>
+                  <div class="period-bill-date">Tue 16 June</div>
+                </div>
+                <div class="period-bill-amount">$11</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">STS Transfer (Cerys)<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Wed 17 June</div>
+                </div>
+                <div class="period-bill-amount">$350</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">AT&amp;T</div>
+                  <div class="period-bill-date">Thu 18 June</div>
+                </div>
+                <div class="period-bill-amount">$227</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Georgie Car</div>
+                  <div class="period-bill-date">Thu 18 June</div>
+                </div>
+                <div class="period-bill-amount">$508</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">SoCal Edison</div>
+                  <div class="period-bill-date">Fri 19 June</div>
+                </div>
+                <div class="period-bill-amount">$200</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Discover Transfer<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Sat 20 June</div>
+                </div>
+                <div class="period-bill-amount">$800</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Disney+</div>
+                  <div class="period-bill-date">Sat 20 June</div>
+                </div>
+                <div class="period-bill-amount">$26</div>
+              </div>
+        </div>
+      </div><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 24 June – Tue 7 July</div>
+            <div class="period-card-range">11 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$3,982</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple iCloud &amp; TV</div>
+                  <div class="period-bill-date">Wed 24 June</div>
+                </div>
+                <div class="period-bill-amount">$16</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Irvine Music</div>
+                  <div class="period-bill-date">Thu 25 June</div>
+                </div>
+                <div class="period-bill-amount">$25</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Spotify</div>
+                  <div class="period-bill-date">Fri 26 June</div>
+                </div>
+                <div class="period-bill-amount">$20</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">ChatGPT</div>
+                  <div class="period-bill-date">Sat 27 June</div>
+                </div>
+                <div class="period-bill-amount">$20</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Paramount+</div>
+                  <div class="period-bill-date">Sun 28 June</div>
+                </div>
+                <div class="period-bill-amount">$8</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Gas</div>
+                  <div class="period-bill-date">Sun 28 June</div>
+                </div>
+                <div class="period-bill-amount">$30</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Roundpoint Mortgage</div>
+                  <div class="period-bill-date">Wed 1 July</div>
+                </div>
+                <div class="period-bill-amount">$3,380</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">YouTube TV</div>
+                  <div class="period-bill-date">Thu 2 July</div>
+                </div>
+                <div class="period-bill-amount">$93</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">STS Transfer<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Sat 4 July</div>
+                </div>
+                <div class="period-bill-amount">$350</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Garmin</div>
+                  <div class="period-bill-date">Sat 4 July</div>
+                </div>
+                <div class="period-bill-amount">$15</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Netflix</div>
+                  <div class="period-bill-date">Sun 5 July</div>
+                </div>
+                <div class="period-bill-amount">$25</div>
+              </div>
+        </div>
+      </div><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 8 July – Tue 21 July</div>
+            <div class="period-card-range">15 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$4,629</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">HOA Fees<span class="expense-badge badge-red" style="margin-left:6px;">Georgie</span></div>
+                  <div class="period-bill-date">Thu 9 July</div>
+                </div>
+                <div class="period-bill-amount">$515</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Geico Insurance</div>
+                  <div class="period-bill-date">Fri 10 July</div>
+                </div>
+                <div class="period-bill-amount">$208</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Ring</div>
+                  <div class="period-bill-date">Fri 10 July</div>
+                </div>
+                <div class="period-bill-amount">$5</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Cox Internet</div>
+                  <div class="period-bill-date">Sat 11 July</div>
+                </div>
+                <div class="period-bill-amount">$186</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple</div>
+                  <div class="period-bill-date">Sat 11 July</div>
+                </div>
+                <div class="period-bill-amount">$2</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">HP Ink</div>
+                  <div class="period-bill-date">Sat 11 July</div>
+                </div>
+                <div class="period-bill-amount">$6</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Irvine Water</div>
+                  <div class="period-bill-date">Wed 15 July</div>
+                </div>
+                <div class="period-bill-amount">$85</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Credit Card<span class="expense-badge badge-red" style="margin-left:6px;">Georgie</span></div>
+                  <div class="period-bill-date">Thu 16 July</div>
+                </div>
+                <div class="period-bill-amount">$1,500</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple (Cerys)</div>
+                  <div class="period-bill-date">Thu 16 July</div>
+                </div>
+                <div class="period-bill-amount">$11</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">STS Transfer (Cerys)<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Fri 17 July</div>
+                </div>
+                <div class="period-bill-amount">$350</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">AT&amp;T</div>
+                  <div class="period-bill-date">Sat 18 July</div>
+                </div>
+                <div class="period-bill-amount">$227</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Georgie Car</div>
+                  <div class="period-bill-date">Sat 18 July</div>
+                </div>
+                <div class="period-bill-amount">$508</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">SoCal Edison</div>
+                  <div class="period-bill-date">Sun 19 July</div>
+                </div>
+                <div class="period-bill-amount">$200</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Discover Transfer<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Mon 20 July</div>
+                </div>
+                <div class="period-bill-amount">$800</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Disney+</div>
+                  <div class="period-bill-date">Mon 20 July</div>
+                </div>
+                <div class="period-bill-amount">$26</div>
+              </div>
+        </div>
+      </div><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 22 July – Tue 4 August</div>
+            <div class="period-card-range">10 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$3,957</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple iCloud &amp; TV</div>
+                  <div class="period-bill-date">Fri 24 July</div>
+                </div>
+                <div class="period-bill-amount">$16</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Irvine Music</div>
+                  <div class="period-bill-date">Sat 25 July</div>
+                </div>
+                <div class="period-bill-amount">$25</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Spotify</div>
+                  <div class="period-bill-date">Sun 26 July</div>
+                </div>
+                <div class="period-bill-amount">$20</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">ChatGPT</div>
+                  <div class="period-bill-date">Mon 27 July</div>
+                </div>
+                <div class="period-bill-amount">$20</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Paramount+</div>
+                  <div class="period-bill-date">Tue 28 July</div>
+                </div>
+                <div class="period-bill-amount">$8</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Gas</div>
+                  <div class="period-bill-date">Tue 28 July</div>
+                </div>
+                <div class="period-bill-amount">$30</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Roundpoint Mortgage</div>
+                  <div class="period-bill-date">Sat 1 August</div>
+                </div>
+                <div class="period-bill-amount">$3,380</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">YouTube TV</div>
+                  <div class="period-bill-date">Sun 2 August</div>
+                </div>
+                <div class="period-bill-amount">$93</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">STS Transfer<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Tue 4 August</div>
+                </div>
+                <div class="period-bill-amount">$350</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Garmin</div>
+                  <div class="period-bill-date">Tue 4 August</div>
+                </div>
+                <div class="period-bill-amount">$15</div>
+              </div>
+        </div>
+      </div><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 5 August – Tue 18 August</div>
+            <div class="period-card-range">13 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$3,628</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Netflix</div>
+                  <div class="period-bill-date">Wed 5 August</div>
+                </div>
+                <div class="period-bill-amount">$25</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">HOA Fees<span class="expense-badge badge-red" style="margin-left:6px;">Georgie</span></div>
+                  <div class="period-bill-date">Sun 9 August</div>
+                </div>
+                <div class="period-bill-amount">$515</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Geico Insurance</div>
+                  <div class="period-bill-date">Mon 10 August</div>
+                </div>
+                <div class="period-bill-amount">$208</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Ring</div>
+                  <div class="period-bill-date">Mon 10 August</div>
+                </div>
+                <div class="period-bill-amount">$5</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Cox Internet</div>
+                  <div class="period-bill-date">Tue 11 August</div>
+                </div>
+                <div class="period-bill-amount">$186</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple</div>
+                  <div class="period-bill-date">Tue 11 August</div>
+                </div>
+                <div class="period-bill-amount">$2</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">HP Ink</div>
+                  <div class="period-bill-date">Tue 11 August</div>
+                </div>
+                <div class="period-bill-amount">$6</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Irvine Water</div>
+                  <div class="period-bill-date">Sat 15 August</div>
+                </div>
+                <div class="period-bill-amount">$85</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Credit Card<span class="expense-badge badge-red" style="margin-left:6px;">Georgie</span></div>
+                  <div class="period-bill-date">Sun 16 August</div>
+                </div>
+                <div class="period-bill-amount">$1,500</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple (Cerys)</div>
+                  <div class="period-bill-date">Sun 16 August</div>
+                </div>
+                <div class="period-bill-amount">$11</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">STS Transfer (Cerys)<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Mon 17 August</div>
+                </div>
+                <div class="period-bill-amount">$350</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">AT&amp;T</div>
+                  <div class="period-bill-date">Tue 18 August</div>
+                </div>
+                <div class="period-bill-amount">$227</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Georgie Car</div>
+                  <div class="period-bill-date">Tue 18 August</div>
+                </div>
+                <div class="period-bill-amount">$508</div>
+              </div>
+        </div>
+      </div><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 19 August – Tue 1 September</div>
+            <div class="period-card-range">10 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$4,525</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">SoCal Edison</div>
+                  <div class="period-bill-date">Wed 19 August</div>
+                </div>
+                <div class="period-bill-amount">$200</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Discover Transfer<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Thu 20 August</div>
+                </div>
+                <div class="period-bill-amount">$800</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Disney+</div>
+                  <div class="period-bill-date">Thu 20 August</div>
+                </div>
+                <div class="period-bill-amount">$26</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple iCloud &amp; TV</div>
+                  <div class="period-bill-date">Mon 24 August</div>
+                </div>
+                <div class="period-bill-amount">$16</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Irvine Music</div>
+                  <div class="period-bill-date">Tue 25 August</div>
+                </div>
+                <div class="period-bill-amount">$25</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Spotify</div>
+                  <div class="period-bill-date">Wed 26 August</div>
+                </div>
+                <div class="period-bill-amount">$20</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">ChatGPT</div>
+                  <div class="period-bill-date">Thu 27 August</div>
+                </div>
+                <div class="period-bill-amount">$20</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Paramount+</div>
+                  <div class="period-bill-date">Fri 28 August</div>
+                </div>
+                <div class="period-bill-amount">$8</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Gas</div>
+                  <div class="period-bill-date">Fri 28 August</div>
+                </div>
+                <div class="period-bill-amount">$30</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Roundpoint Mortgage</div>
+                  <div class="period-bill-date">Tue 1 September</div>
+                </div>
+                <div class="period-bill-amount">$3,380</div>
+              </div>
+        </div>
+      </div><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 2 September – Tue 15 September</div>
+            <div class="period-card-range">11 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$1,490</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">YouTube TV</div>
+                  <div class="period-bill-date">Wed 2 September</div>
+                </div>
+                <div class="period-bill-amount">$93</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">STS Transfer<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Fri 4 September</div>
+                </div>
+                <div class="period-bill-amount">$350</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Garmin</div>
+                  <div class="period-bill-date">Fri 4 September</div>
+                </div>
+                <div class="period-bill-amount">$15</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Netflix</div>
+                  <div class="period-bill-date">Sat 5 September</div>
+                </div>
+                <div class="period-bill-amount">$25</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">HOA Fees<span class="expense-badge badge-red" style="margin-left:6px;">Georgie</span></div>
+                  <div class="period-bill-date">Wed 9 September</div>
+                </div>
+                <div class="period-bill-amount">$515</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Geico Insurance</div>
+                  <div class="period-bill-date">Thu 10 September</div>
+                </div>
+                <div class="period-bill-amount">$208</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Ring</div>
+                  <div class="period-bill-date">Thu 10 September</div>
+                </div>
+                <div class="period-bill-amount">$5</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Cox Internet</div>
+                  <div class="period-bill-date">Fri 11 September</div>
+                </div>
+                <div class="period-bill-amount">$186</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple</div>
+                  <div class="period-bill-date">Fri 11 September</div>
+                </div>
+                <div class="period-bill-amount">$2</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">HP Ink</div>
+                  <div class="period-bill-date">Fri 11 September</div>
+                </div>
+                <div class="period-bill-amount">$6</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Irvine Water</div>
+                  <div class="period-bill-date">Tue 15 September</div>
+                </div>
+                <div class="period-bill-amount">$85</div>
+              </div>
+        </div>
+      </div><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 16 September – Tue 29 September</div>
+            <div class="period-card-range">14 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$3,741</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Credit Card<span class="expense-badge badge-red" style="margin-left:6px;">Georgie</span></div>
+                  <div class="period-bill-date">Wed 16 September</div>
+                </div>
+                <div class="period-bill-amount">$1,500</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple (Cerys)</div>
+                  <div class="period-bill-date">Wed 16 September</div>
+                </div>
+                <div class="period-bill-amount">$11</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">STS Transfer (Cerys)<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Thu 17 September</div>
+                </div>
+                <div class="period-bill-amount">$350</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">AT&amp;T</div>
+                  <div class="period-bill-date">Fri 18 September</div>
+                </div>
+                <div class="period-bill-amount">$227</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Georgie Car</div>
+                  <div class="period-bill-date">Fri 18 September</div>
+                </div>
+                <div class="period-bill-amount">$508</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">SoCal Edison</div>
+                  <div class="period-bill-date">Sat 19 September</div>
+                </div>
+                <div class="period-bill-amount">$200</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Discover Transfer<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Sun 20 September</div>
+                </div>
+                <div class="period-bill-amount">$800</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Disney+</div>
+                  <div class="period-bill-date">Sun 20 September</div>
+                </div>
+                <div class="period-bill-amount">$26</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple iCloud &amp; TV</div>
+                  <div class="period-bill-date">Thu 24 September</div>
+                </div>
+                <div class="period-bill-amount">$16</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Irvine Music</div>
+                  <div class="period-bill-date">Fri 25 September</div>
+                </div>
+                <div class="period-bill-amount">$25</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Spotify</div>
+                  <div class="period-bill-date">Sat 26 September</div>
+                </div>
+                <div class="period-bill-amount">$20</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">ChatGPT</div>
+                  <div class="period-bill-date">Sun 27 September</div>
+                </div>
+                <div class="period-bill-amount">$20</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Paramount+</div>
+                  <div class="period-bill-date">Mon 28 September</div>
+                </div>
+                <div class="period-bill-amount">$8</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Gas</div>
+                  <div class="period-bill-date">Mon 28 September</div>
+                </div>
+                <div class="period-bill-amount">$30</div>
+              </div>
+        </div>
+      </div><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 30 September – Tue 13 October</div>
+            <div class="period-card-range">11 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$4,785</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Roundpoint Mortgage</div>
+                  <div class="period-bill-date">Thu 1 October</div>
+                </div>
+                <div class="period-bill-amount">$3,380</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">YouTube TV</div>
+                  <div class="period-bill-date">Fri 2 October</div>
+                </div>
+                <div class="period-bill-amount">$93</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">STS Transfer<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Sun 4 October</div>
+                </div>
+                <div class="period-bill-amount">$350</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Garmin</div>
+                  <div class="period-bill-date">Sun 4 October</div>
+                </div>
+                <div class="period-bill-amount">$15</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Netflix</div>
+                  <div class="period-bill-date">Mon 5 October</div>
+                </div>
+                <div class="period-bill-amount">$25</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">HOA Fees<span class="expense-badge badge-red" style="margin-left:6px;">Georgie</span></div>
+                  <div class="period-bill-date">Fri 9 October</div>
+                </div>
+                <div class="period-bill-amount">$515</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Geico Insurance</div>
+                  <div class="period-bill-date">Sat 10 October</div>
+                </div>
+                <div class="period-bill-amount">$208</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Ring</div>
+                  <div class="period-bill-date">Sat 10 October</div>
+                </div>
+                <div class="period-bill-amount">$5</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Cox Internet</div>
+                  <div class="period-bill-date">Sun 11 October</div>
+                </div>
+                <div class="period-bill-amount">$186</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple</div>
+                  <div class="period-bill-date">Sun 11 October</div>
+                </div>
+                <div class="period-bill-amount">$2</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">HP Ink</div>
+                  <div class="period-bill-date">Sun 11 October</div>
+                </div>
+                <div class="period-bill-amount">$6</div>
+              </div>
+        </div>
+      </div><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 14 October – Tue 27 October</div>
+            <div class="period-card-range">13 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$3,788</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Irvine Water</div>
+                  <div class="period-bill-date">Thu 15 October</div>
+                </div>
+                <div class="period-bill-amount">$85</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Credit Card<span class="expense-badge badge-red" style="margin-left:6px;">Georgie</span></div>
+                  <div class="period-bill-date">Fri 16 October</div>
+                </div>
+                <div class="period-bill-amount">$1,500</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple (Cerys)</div>
+                  <div class="period-bill-date">Fri 16 October</div>
+                </div>
+                <div class="period-bill-amount">$11</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">STS Transfer (Cerys)<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Sat 17 October</div>
+                </div>
+                <div class="period-bill-amount">$350</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">AT&amp;T</div>
+                  <div class="period-bill-date">Sun 18 October</div>
+                </div>
+                <div class="period-bill-amount">$227</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Georgie Car</div>
+                  <div class="period-bill-date">Sun 18 October</div>
+                </div>
+                <div class="period-bill-amount">$508</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">SoCal Edison</div>
+                  <div class="period-bill-date">Mon 19 October</div>
+                </div>
+                <div class="period-bill-amount">$200</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Discover Transfer<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Tue 20 October</div>
+                </div>
+                <div class="period-bill-amount">$800</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Disney+</div>
+                  <div class="period-bill-date">Tue 20 October</div>
+                </div>
+                <div class="period-bill-amount">$26</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple iCloud &amp; TV</div>
+                  <div class="period-bill-date">Sat 24 October</div>
+                </div>
+                <div class="period-bill-amount">$16</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Irvine Music</div>
+                  <div class="period-bill-date">Sun 25 October</div>
+                </div>
+                <div class="period-bill-amount">$25</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Spotify</div>
+                  <div class="period-bill-date">Mon 26 October</div>
+                </div>
+                <div class="period-bill-amount">$20</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">ChatGPT</div>
+                  <div class="period-bill-date">Tue 27 October</div>
+                </div>
+                <div class="period-bill-amount">$20</div>
+              </div>
+        </div>
+      </div><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 28 October – Tue 10 November</div>
+            <div class="period-card-range">10 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$4,629</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Paramount+</div>
+                  <div class="period-bill-date">Wed 28 October</div>
+                </div>
+                <div class="period-bill-amount">$8</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Gas</div>
+                  <div class="period-bill-date">Wed 28 October</div>
+                </div>
+                <div class="period-bill-amount">$30</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Roundpoint Mortgage</div>
+                  <div class="period-bill-date">Sun 1 November</div>
+                </div>
+                <div class="period-bill-amount">$3,380</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">YouTube TV</div>
+                  <div class="period-bill-date">Mon 2 November</div>
+                </div>
+                <div class="period-bill-amount">$93</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">STS Transfer<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Wed 4 November</div>
+                </div>
+                <div class="period-bill-amount">$350</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Garmin</div>
+                  <div class="period-bill-date">Wed 4 November</div>
+                </div>
+                <div class="period-bill-amount">$15</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Netflix</div>
+                  <div class="period-bill-date">Thu 5 November</div>
+                </div>
+                <div class="period-bill-amount">$25</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">HOA Fees<span class="expense-badge badge-red" style="margin-left:6px;">Georgie</span></div>
+                  <div class="period-bill-date">Mon 9 November</div>
+                </div>
+                <div class="period-bill-amount">$515</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Geico Insurance</div>
+                  <div class="period-bill-date">Tue 10 November</div>
+                </div>
+                <div class="period-bill-amount">$208</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Ring</div>
+                  <div class="period-bill-date">Tue 10 November</div>
+                </div>
+                <div class="period-bill-amount">$5</div>
+              </div>
+        </div>
+      </div><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 11 November – Tue 24 November</div>
+            <div class="period-card-range">13 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$3,917</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Cox Internet</div>
+                  <div class="period-bill-date">Wed 11 November</div>
+                </div>
+                <div class="period-bill-amount">$186</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple</div>
+                  <div class="period-bill-date">Wed 11 November</div>
+                </div>
+                <div class="period-bill-amount">$2</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">HP Ink</div>
+                  <div class="period-bill-date">Wed 11 November</div>
+                </div>
+                <div class="period-bill-amount">$6</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Irvine Water</div>
+                  <div class="period-bill-date">Sun 15 November</div>
+                </div>
+                <div class="period-bill-amount">$85</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Credit Card<span class="expense-badge badge-red" style="margin-left:6px;">Georgie</span></div>
+                  <div class="period-bill-date">Mon 16 November</div>
+                </div>
+                <div class="period-bill-amount">$1,500</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple (Cerys)</div>
+                  <div class="period-bill-date">Mon 16 November</div>
+                </div>
+                <div class="period-bill-amount">$11</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">STS Transfer (Cerys)<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Tue 17 November</div>
+                </div>
+                <div class="period-bill-amount">$350</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">AT&amp;T</div>
+                  <div class="period-bill-date">Wed 18 November</div>
+                </div>
+                <div class="period-bill-amount">$227</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Georgie Car</div>
+                  <div class="period-bill-date">Wed 18 November</div>
+                </div>
+                <div class="period-bill-amount">$508</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">SoCal Edison</div>
+                  <div class="period-bill-date">Thu 19 November</div>
+                </div>
+                <div class="period-bill-amount">$200</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Discover Transfer<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Fri 20 November</div>
+                </div>
+                <div class="period-bill-amount">$800</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Disney+</div>
+                  <div class="period-bill-date">Fri 20 November</div>
+                </div>
+                <div class="period-bill-amount">$26</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple iCloud &amp; TV</div>
+                  <div class="period-bill-date">Tue 24 November</div>
+                </div>
+                <div class="period-bill-amount">$16</div>
+              </div>
+        </div>
+      </div><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 25 November – Tue 8 December</div>
+            <div class="period-card-range">10 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$3,966</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Irvine Music</div>
+                  <div class="period-bill-date">Wed 25 November</div>
+                </div>
+                <div class="period-bill-amount">$25</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Spotify</div>
+                  <div class="period-bill-date">Thu 26 November</div>
+                </div>
+                <div class="period-bill-amount">$20</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">ChatGPT</div>
+                  <div class="period-bill-date">Fri 27 November</div>
+                </div>
+                <div class="period-bill-amount">$20</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Paramount+</div>
+                  <div class="period-bill-date">Sat 28 November</div>
+                </div>
+                <div class="period-bill-amount">$8</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Gas</div>
+                  <div class="period-bill-date">Sat 28 November</div>
+                </div>
+                <div class="period-bill-amount">$30</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Roundpoint Mortgage</div>
+                  <div class="period-bill-date">Tue 1 December</div>
+                </div>
+                <div class="period-bill-amount">$3,380</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">YouTube TV</div>
+                  <div class="period-bill-date">Wed 2 December</div>
+                </div>
+                <div class="period-bill-amount">$93</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">STS Transfer<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Fri 4 December</div>
+                </div>
+                <div class="period-bill-amount">$350</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Garmin</div>
+                  <div class="period-bill-date">Fri 4 December</div>
+                </div>
+                <div class="period-bill-amount">$15</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Netflix</div>
+                  <div class="period-bill-date">Sat 5 December</div>
+                </div>
+                <div class="period-bill-amount">$25</div>
+              </div>
+        </div>
+      </div><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 9 December – Tue 22 December</div>
+            <div class="period-card-range">15 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$4,629</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">HOA Fees<span class="expense-badge badge-red" style="margin-left:6px;">Georgie</span></div>
+                  <div class="period-bill-date">Wed 9 December</div>
+                </div>
+                <div class="period-bill-amount">$515</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Geico Insurance</div>
+                  <div class="period-bill-date">Thu 10 December</div>
+                </div>
+                <div class="period-bill-amount">$208</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Ring</div>
+                  <div class="period-bill-date">Thu 10 December</div>
+                </div>
+                <div class="period-bill-amount">$5</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Cox Internet</div>
+                  <div class="period-bill-date">Fri 11 December</div>
+                </div>
+                <div class="period-bill-amount">$186</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple</div>
+                  <div class="period-bill-date">Fri 11 December</div>
+                </div>
+                <div class="period-bill-amount">$2</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">HP Ink</div>
+                  <div class="period-bill-date">Fri 11 December</div>
+                </div>
+                <div class="period-bill-amount">$6</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Irvine Water</div>
+                  <div class="period-bill-date">Tue 15 December</div>
+                </div>
+                <div class="period-bill-amount">$85</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Credit Card<span class="expense-badge badge-red" style="margin-left:6px;">Georgie</span></div>
+                  <div class="period-bill-date">Wed 16 December</div>
+                </div>
+                <div class="period-bill-amount">$1,500</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple (Cerys)</div>
+                  <div class="period-bill-date">Wed 16 December</div>
+                </div>
+                <div class="period-bill-amount">$11</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">STS Transfer (Cerys)<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Thu 17 December</div>
+                </div>
+                <div class="period-bill-amount">$350</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">AT&amp;T</div>
+                  <div class="period-bill-date">Fri 18 December</div>
+                </div>
+                <div class="period-bill-amount">$227</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Georgie Car</div>
+                  <div class="period-bill-date">Fri 18 December</div>
+                </div>
+                <div class="period-bill-amount">$508</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">SoCal Edison</div>
+                  <div class="period-bill-date">Sat 19 December</div>
+                </div>
+                <div class="period-bill-amount">$200</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Discover Transfer<span class="expense-badge badge-blue" style="margin-left:6px;">Transfer</span></div>
+                  <div class="period-bill-date">Sun 20 December</div>
+                </div>
+                <div class="period-bill-amount">$800</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Disney+</div>
+                  <div class="period-bill-date">Sun 20 December</div>
+                </div>
+                <div class="period-bill-amount">$26</div>
+              </div>
+        </div>
+      </div><div class="period-card">
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">Wed 23 December – Thu 31 December</div>
+            <div class="period-card-range">6 bills due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$119</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          <div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Apple iCloud &amp; TV</div>
+                  <div class="period-bill-date">Thu 24 December</div>
+                </div>
+                <div class="period-bill-amount">$16</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Irvine Music</div>
+                  <div class="period-bill-date">Fri 25 December</div>
+                </div>
+                <div class="period-bill-amount">$25</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Spotify</div>
+                  <div class="period-bill-date">Sat 26 December</div>
+                </div>
+                <div class="period-bill-amount">$20</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">ChatGPT</div>
+                  <div class="period-bill-date">Sun 27 December</div>
+                </div>
+                <div class="period-bill-amount">$20</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Paramount+</div>
+                  <div class="period-bill-date">Mon 28 December</div>
+                </div>
+                <div class="period-bill-amount">$8</div>
+              </div><div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">Gas</div>
+                  <div class="period-bill-date">Mon 28 December</div>
+                </div>
+                <div class="period-bill-amount">$30</div>
+              </div>
+        </div>
+      </div></div>
+  </div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="switchSection('overview', this)">
+    <div class="nav-icon">📊</div>
+    <div class="nav-label">Overview</div>
+  </div>
+  <div class="nav-item" onclick="switchSection('fixed', this)">
+    <div class="nav-icon">📌</div>
+    <div class="nav-label">Fixed</div>
+  </div>
+  <div class="nav-item" onclick="switchSection('variable', this)">
+    <div class="nav-icon">📈</div>
+    <div class="nav-label">Variable</div>
+  </div>
+  <div class="nav-item" onclick="switchSection('calendar', this)">
+    <div class="nav-icon">📅</div>
+    <div class="nav-label">Calendar</div>
+  </div>
+</div>
+
+<script>
+  const calendarData = [
+    { day: 1,  name: "Roundpoint Mortgage",  amount: "$3,380" },
+    { day: 2,  name: "YouTube TV",           amount: "$93" },
+    { day: 4,  name: "STS Transfer",         amount: "$350",   tag: "Transfer" },
+    { day: 4,  name: "Garmin",               amount: "$15" },
+    { day: 5,  name: "Netflix",              amount: "$25" },
+    { day: 9,  name: "HOA Fees",             amount: "$515",   tag: "Georgie" },
+    { day: 10, name: "Geico Insurance",      amount: "$208" },
+    { day: 10, name: "Ring",                 amount: "$5" },
+    { day: 11, name: "Cox Internet",         amount: "$186" },
+    { day: 11, name: "Apple",               amount: "$2" },
+    { day: 11, name: "HP Ink",              amount: "$6" },
+    { day: 15, name: "Irvine Water",        amount: "$85" },
+    { day: 16, name: "Credit Card",         amount: "$1,500",  tag: "Georgie" },
+    { day: 16, name: "Apple (Cerys)",       amount: "$11" },
+    { day: 17, name: "STS Transfer (Cerys)",amount: "$350",   tag: "Transfer" },
+    { day: 18, name: "AT&T",               amount: "$227" },
+    { day: 18, name: "Georgie Car",         amount: "$508" },
+    { day: 19, name: "SoCal Edison",        amount: "$200" },
+    { day: 20, name: "Discover Transfer",   amount: "$800",   tag: "Transfer" },
+    { day: 20, name: "Disney+",            amount: "$26" },
+    { day: 24, name: "Apple iCloud & TV",  amount: "$16" },
+    { day: 25, name: "Irvine Music",       amount: "$25" },
+    { day: 26, name: "Spotify",            amount: "$20" },
+    { day: 27, name: "ChatGPT",            amount: "$20" },
+    { day: 28, name: "Paramount+",         amount: "$8" },
+    { day: 28, name: "Gas",               amount: "$30" },
+  ];
+
+  const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const DAY_NAMES   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+  function formatDate(year, month, day) {
+    const d = new Date(year, month, day);
+    return `${DAY_NAMES[d.getDay()]} ${day} ${MONTH_NAMES[month]}`;
+  }
+
+  function buildCalendar() {
+    const now       = new Date();
+    const today     = now.getDate();
+    const thisMonth = now.getMonth();
+    const thisYear  = now.getFullYear();
+
+    // Update heading
+    document.getElementById('calendar-heading').textContent = `${MONTH_NAMES[thisMonth]} ${thisYear}`;
+    document.getElementById('calendar-subhead').textContent = `Today is ${formatDate(thisYear, thisMonth, today)}`;
+
+    // --- Calculate current biweekly pay period (Wed–Tue) ---
+    // Find the most recent Wednesday on or before today
+    const todayDate = new Date(thisYear, thisMonth, today);
+    const dayOfWeek = todayDate.getDay(); // 0=Sun,1=Mon,...,3=Wed
+    const daysFromWed = (dayOfWeek + 7 - 3) % 7; // days since last Wednesday
+    const periodStart = new Date(todayDate);
+    periodStart.setDate(todayDate.getDate() - daysFromWed);
+    const periodEnd = new Date(periodStart);
+    periodEnd.setDate(periodStart.getDate() + 13); // 14-day period
+
+    const periodStartDay = periodStart.getDate();
+    const periodStartMonth = periodStart.getMonth();
+    const periodEndDay = periodEnd.getDate();
+    const periodEndMonth = periodEnd.getMonth();
+
+    // Format a date object nicely
+    function fmtDateObj(d) {
+      return `${DAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
+    }
+
+    // Bills in this pay period — handle month crossover
+    const periodItems = calendarData.filter(item => {
+      const billDate = new Date(thisYear, thisMonth, item.day);
+      // also check previous month if period started last month
+      const billDatePrevMonth = new Date(thisYear, thisMonth - 1, item.day);
+      return (billDate >= periodStart && billDate <= periodEnd) ||
+             (billDatePrevMonth >= periodStart && billDatePrevMonth <= periodEnd);
+    });
+
+    // Calculate running total for period
+    function parseDollar(str) {
+      return parseFloat(str.replace(/[$,]/g, '')) || 0;
+    }
+    const periodTotal = periodItems.reduce((sum, i) => sum + parseDollar(i.amount), 0);
+
+    const upcomingBlock = document.getElementById('upcoming-block');
+    const upcomingList  = document.getElementById('upcoming-list');
+
+    document.getElementById('upcoming-period-range').textContent =
+      `${fmtDateObj(periodStart)} → ${fmtDateObj(periodEnd)}`;
+
+    if (periodItems.length > 0) {
+      upcomingBlock.style.display = 'block';
+      periodItems.forEach(item => {
+        const isToday = item.day === today;
+        const isPast  = item.day < today;
+        const el = document.createElement('div');
+        el.className = 'expense-item';
+        el.style.cssText = isToday
+          ? 'border-color:#2d6a4f;background:#e8f4ed;'
+          : isPast ? 'opacity:0.55;' : '';
+        const tagHTML = item.tag
+          ? `<span class="expense-badge ${item.tag === 'Georgie' ? 'badge-red' : 'badge-blue'}">${item.tag}</span>`
+          : '';
+        el.innerHTML = `
+          <div class="expense-left">
+            <div class="expense-name">${item.name}${tagHTML}</div>
+            <div class="expense-day" style="color:${isToday ? 'var(--accent)' : 'var(--text-muted)'};">
+              ${isToday ? '📍 Today' : formatDate(thisYear, thisMonth, item.day)}
+            </div>
+          </div>
+          <div class="expense-amount" style="text-decoration:${isPast && !isToday ? 'line-through' : 'none'};">${item.amount}</div>
+        `;
+        upcomingList.appendChild(el);
+      });
+
+      document.getElementById('upcoming-total-val').textContent =
+        '$' + periodTotal.toLocaleString('en-US', {minimumFractionDigits: 0});
+    }
+
+    // --- Split into sections (exclude pay period items) ---
+    const container  = document.getElementById('calendar-list');
+    const periodDays = new Set(periodItems.map(i => i.day));
+    const pastItems  = calendarData.filter(i => i.day < today && !periodDays.has(i.day)).slice().reverse();
+    const futureItems = calendarData.filter(i => i.day > today && !periodDays.has(i.day));
+
+    function renderGroup(items, isPast) {
+      let currentDay = null;
+      items.forEach(item => {
+        if (item.day !== currentDay) {
+          currentDay = item.day;
+          const dayHeader = document.createElement('div');
+          dayHeader.style.cssText = `font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:10px 4px 4px;margin-top:4px;color:${isPast ? '#c5bfb8' : 'var(--text-muted)'};`;
+          dayHeader.textContent = formatDate(thisYear, thisMonth, item.day);
+          container.appendChild(dayHeader);
+        }
+        const el = document.createElement('div');
+        el.className = 'expense-item';
+        if (isPast) el.style.cssText = 'opacity:0.45;';
+        const tagHTML = item.tag
+          ? `<span class="expense-badge ${item.tag === 'Georgie' ? 'badge-red' : 'badge-blue'}">${item.tag}</span>`
+          : '';
+        el.innerHTML = `
+          <div class="expense-left"><div class="expense-name">${item.name}${tagHTML}</div></div>
+          <div class="expense-amount" style="text-decoration:${isPast ? 'line-through' : 'none'};">${item.amount}</div>
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    if (futureItems.length > 0) {
+      const lbl = document.createElement('div');
+      lbl.style.cssText = 'font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;padding:4px 4px 0;';
+      lbl.textContent = 'Later This Month';
+      container.appendChild(lbl);
+      renderGroup(futureItems, false);
+    }
+
+    if (pastItems.length > 0) {
+      const lbl = document.createElement('div');
+      lbl.style.cssText = 'font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#c5bfb8;margin:20px 0 10px;padding-top:16px;border-top:1px solid var(--border);';
+      lbl.textContent = 'Already Paid This Month';
+      container.appendChild(lbl);
+      renderGroup(pastItems, true);
+    }
+    // --- Build future pay periods through end of year ---
+    const yearEnd = new Date(thisYear, 11, 31);
+    const futurePeriodsBlock = document.getElementById('future-periods-block');
+    const futurePeriodsList  = document.getElementById('future-periods-list');
+    futurePeriodsList.innerHTML = '';
+
+    // Start from the period AFTER current
+    let fpStart = new Date(periodEnd);
+    fpStart.setDate(fpStart.getDate() + 1);
+    let periodsBuilt = 0;
+
+    while (fpStart <= yearEnd) {
+      const fpEnd = new Date(fpStart);
+      fpEnd.setDate(fpStart.getDate() + 13);
+
+      // Collect bills that fall in this future period
+      const fpBills = [];
+      let d = new Date(fpStart);
+      while (d <= fpEnd && d <= yearEnd) {
+        const m = d.getMonth();
+        const y = d.getFullYear();
+        calendarData.forEach(item => {
+          const billDate = new Date(y, m, item.day);
+          if (billDate.getTime() === new Date(y, m, item.day).getTime() &&
+              billDate >= fpStart && billDate <= fpEnd) {
+            // avoid duplicates if same bill already added for this period
+            const key = `${item.day}-${m}-${item.name}`;
+            if (!fpBills.find(b => b._key === key)) {
+              fpBills.push({ ...item, _month: m, _year: y, _key: key });
+            }
+          }
+        });
+        d.setDate(d.getDate() + 1);
+      }
+
+      const fpTotal = fpBills.reduce((sum, i) => sum + parseDollar(i.amount), 0);
+      const periodLabel = `Pay Period ${periodsBuilt + 1}`;
+
+      const card = document.createElement('div');
+      card.className = 'period-card';
+      card.innerHTML = `
+        <div class="period-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="period-card-header-left">
+            <div class="period-card-title">${fmtDateObj(fpStart)} – ${fmtDateObj(fpEnd > yearEnd ? yearEnd : fpEnd)}</div>
+            <div class="period-card-range">${fpBills.length} bill${fpBills.length !== 1 ? 's' : ''} due</div>
+          </div>
+          <div class="period-card-right">
+            <div class="period-card-total">$${fpTotal.toLocaleString('en-US')}</div>
+            <div class="period-chevron">▼</div>
+          </div>
+        </div>
+        <div class="period-card-body">
+          ${fpBills.length === 0 ? '<div style="font-size:13px;color:var(--text-muted);padding:4px 0;">No fixed bills this period</div>' :
+            fpBills.map(b => {
+              const tagHTML = b.tag
+                ? `<span class="expense-badge ${b.tag === 'Georgie' ? 'badge-red' : 'badge-blue'}" style="margin-left:6px;">${b.tag}</span>`
+                : '';
+              return `<div class="period-bill-row">
+                <div>
+                  <div class="period-bill-name">${b.name}${tagHTML}</div>
+                  <div class="period-bill-date">${DAY_NAMES[new Date(b._year, b._month, b.day).getDay()]} ${b.day} ${MONTH_NAMES[b._month]}</div>
+                </div>
+                <div class="period-bill-amount">${b.amount}</div>
+              </div>`;
+            }).join('')
+          }
+        </div>
+      `;
+      futurePeriodsList.appendChild(card);
+
+      fpStart = new Date(fpEnd);
+      fpStart.setDate(fpStart.getDate() + 1);
+      periodsBuilt++;
+    }
+
+    if (periodsBuilt > 0) futurePeriodsBlock.style.display = 'block';
+  }
+
+  buildCalendar();
+
+  function switchTab(id, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById(id).classList.add('active');
+  }
+
+  function switchSection(id, el) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      const ids = ['overview','fixed','variable','calendar'];
+      if (ids[i] === id) t.classList.add('active'); else t.classList.remove('active');
+    });
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+</script>
+
+
+</div></body></html>
